@@ -1,0 +1,29 @@
+# SMARD German Electricity Market Analysis — dependencies
+# install:  pip install -r requirements.txt
+
+# --- core data handling (phase 1-2) ---
+pandas>=2.0
+numpy>=1.24
+
+# --- notebook environment ---
+jupyterlab>=4.0
+ipykernel>=6.25
+nbformat>=5.9          # REQUIRED for plotly fig.show() inside notebooks
+ipywidgets>=8.0        # plotly interactivity in JupyterLab
+
+# --- visualization (phase 3) ---
+matplotlib>=3.7
+seaborn>=0.13
+plotly>=5.18
+
+# --- machine learning (phase 5) ---
+scikit-learn>=1.3      # includes HistGradientBoosting — no separate boosting lib needed
+shap>=0.44             # attribution model explanations
+
+# --- calendar features ---
+holidays>=0.40         # German public holidays; load drops noticeably on them
+
+# --- optional ---
+# kaleido>=0.2.1       # only if exporting plotly figures to static PNG
+# lightgbm>=4.1        # faster than sklearn's GBM on larger data; not required here
+# pyarrow>=14.0        # parquet instead of CSV for clean_hourly; faster, typed
