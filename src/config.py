@@ -46,6 +46,7 @@ CONVENTIONAL = [
     "Lignite",
     "Hard coal",
     "Fossil gas",
+    "Pumped storage generation",
     "Other conventional",
 ]
 
