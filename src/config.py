@@ -67,6 +67,8 @@ PRICE_REGIMES = {
     "spike": (150, float("inf")),
 }
 
+SPIKE_THRESHOLD = PRICE_REGIMES["spike"][0]
+
 # --- plotting ---------------------------------------------------------
 
 FUEL_COLORS = {

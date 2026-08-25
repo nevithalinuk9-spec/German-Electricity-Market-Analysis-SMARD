@@ -230,8 +230,12 @@ The lags-only model **loses to naive**. That is a real result, not a bug. Do not
 tune it away or hide it.
 
 Target stats: mean 83.91, median 86.36, std 52.69, range −250.32 to 936.28,
-skew 1.86, kurtosis 20.33. 1,030 negative hours (5.9%), 291 above €200 (1.7%).
+skew 1.86, kurtosis 20.33. 1,030 negative hours (5.9%), 996 above €150 (5.7%).
 2024 mean 78.51 → 2025 mean 89.33 (regime shift — expect out-of-sample degradation).
+
+The spike regime is defined as price > 150 EUR/MWh, per `config.PRICE_REGIMES`
+— the single source of truth for negative/normal/spike boundaries, used for
+all per-regime error reporting.
 
 Top correlations with price: `Residual load` 0.827, `renewable_share` −0.752,
 `conventional_gen` 0.748, `vre_share` −0.731, `price_lag24` 0.676.
