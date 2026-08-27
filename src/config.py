@@ -71,6 +71,10 @@ SPIKE_THRESHOLD = PRICE_REGIMES["spike"][0]
 
 # --- plotting ---------------------------------------------------------
 
+FIGSIZE = (10, 6)
+PLOTLY_WIDTH = 900
+PLOTLY_HEIGHT = 550
+
 FUEL_COLORS = {
     "Biomass": "#4C9A2A",
     "Hydropower": "#1F77B4",
