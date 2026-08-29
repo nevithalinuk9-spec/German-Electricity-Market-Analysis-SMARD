@@ -17,8 +17,11 @@ seaborn>=0.13
 plotly>=5.18
 
 # --- machine learning (phase 5) ---
-scikit-learn>=1.3      # includes HistGradientBoosting — no separate boosting lib needed
-shap>=0.44             # attribution model explanations
+scikit-learn>=1.3      # includes HistGradientBoosting, permutation_importance, partial_dependence
+# shap>=0.44            # BLOCKED on this machine: numba's compiled extension is refused by a
+#                        # Windows Application Control policy (OS-level, not a package issue).
+#                        # Attribution now uses sklearn.inspection (permutation importance +
+#                        # partial dependence) instead — see src/models.py.
 
 # --- calendar features ---
 holidays>=0.40         # German public holidays; load drops noticeably on them

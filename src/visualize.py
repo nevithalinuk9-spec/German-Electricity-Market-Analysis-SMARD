@@ -159,3 +159,27 @@ def plot_price_distribution(df: pd.DataFrame, price_col: str = "price") -> plt.F
     ax.set_ylabel("count (log scale)")
     ax.set_title("Price distribution")
     return fig
+
+
+def plot_permutation_importance(imp_df: pd.DataFrame, top_n: int = 15) -> plt.Figure:
+    """Horizontal bar chart of the top_n permutation-importance features, with error bars from importance_std."""
+    top = imp_df.head(top_n).iloc[::-1]
+
+    fig, ax = plt.subplots(figsize=config.FIGSIZE)
+    ax.barh(top["feature"], top["importance_mean"], xerr=top["importance_std"])
+    ax.set_xlabel("permutation importance (increase in MAE)")
+    ax.set_ylabel("feature")
+    ax.set_title("Permutation importance")
+    return fig
+
+
+def plot_partial_dependence(pd_data: dict[str, pd.DataFrame], feature: str) -> plt.Figure:
+    """Line plot of partial dependence for one feature: x = feature value, y = average predicted price."""
+    data = pd_data[feature]
+
+    fig, ax = plt.subplots(figsize=config.FIGSIZE)
+    ax.plot(data["grid_value"], data["avg_prediction"])
+    ax.set_xlabel(feature)
+    ax.set_ylabel("partial dependence (avg. predicted price, EUR/MWh)")
+    ax.set_title(f"Partial dependence — {feature}")
+    return fig
