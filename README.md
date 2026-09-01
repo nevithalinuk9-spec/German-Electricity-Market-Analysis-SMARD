@@ -176,7 +176,6 @@ notebooks/
   SMARD_machine_Learning.ipynb  modelling
 
 PowerBI/           dashboard screenshots
-reference/         throwaway diagnostic run, not a pipeline input
 ```
 
 Every function in `src/` is pure: it takes arguments and returns a value. No
