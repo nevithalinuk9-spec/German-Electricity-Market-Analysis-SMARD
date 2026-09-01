@@ -63,7 +63,7 @@ Three hourly exports, 1 January 2024 to 31 December 2025:
 
 Germany shut down its last three nuclear reactors on **15 April 2023**. This
 period is therefore the **first clean two-year window of a fully post-nuclear
-German power system** — no residual nuclear baseload distorting the merit order,
+German power system** , no residual nuclear baseload distorting the merit order,
 and no transitional period to control for.
 
 The data confirms it: the `Nuclear` column is 0.00 MWh until SMARD stops
