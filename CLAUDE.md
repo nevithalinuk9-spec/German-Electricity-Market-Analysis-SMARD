@@ -2,13 +2,15 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Current state (check before assuming anything is built)
+## Current state
 
-Nothing beyond raw data and dependencies exists yet: `data/raw/` has the 3 SMARD
-CSVs, `requirements.txt` is defined, and `src/__init__.py` is empty. There is no
-`notebooks/` directory, no other `src/` module, and no `data/interim/` output.
-Start at Phase 1 (`config.py` → `data_loader.py`) per Build order below. Do not
-assume later-phase files exist without checking.
+Everything below is built. `src/` has all its modules, both notebooks are
+written and have been run end to end, `data/interim/clean_hourly.csv` exists,
+and the Power BI dashboard is built in `PowerBI/`. There is no
+`src/powerbi_export.py` and no `data/processed/`: the dashboard is built by
+hand in Power BI Desktop and Power Query, reading `clean_hourly.csv` directly,
+not by a Python export step. Check the actual file before assuming a module or
+notebook section has a particular shape.
 
 ## Commands
 
@@ -21,8 +23,8 @@ python -m venv .SMARD
 pip install -r requirements.txt
 
 # run the notebooks
-jupyter lab   # open notebooks/SMARD_analysis.ipynb (phases 1-4, 6) and/or
-              # notebooks/SMARD_machine_Learning.ipynb (phase 5)
+jupyter lab   # open notebooks/SMARD_analysis.ipynb (Clean, EDA, Visualizations,
+              # Insights) and/or notebooks/SMARD_machine_Learning.ipynb (modelling)
 ```
 
 There is no lint config, formatter, or test suite in this repo, so don't invent
@@ -37,9 +39,10 @@ Analysis of hourly German electricity market data from SMARD (Bundesnetzagentur)
 Pipeline: clean → EDA → visualizations → insights → ML → Power BI.
 
 **Architecture: importable `.py` modules in `src/`, orchestrated from notebooks.**
-Notebooks are the only files that run: `SMARD_analysis.ipynb` for phases 1-4
-and 6, `SMARD_machine_Learning.ipynb` for phase 5. Modules provide functions;
-the notebooks call them, display results, and hold all written interpretation.
+Notebooks are the only files that run: `SMARD_analysis.ipynb` covers Clean,
+EDA, Visualizations, and Insights; `SMARD_machine_Learning.ipynb` covers
+modelling. Modules provide functions; the notebooks call them, display
+results, and hold all written interpretation.
 
 Python on Windows. pandas, numpy, scikit-learn, matplotlib/seaborn/plotly.
 
@@ -47,38 +50,40 @@ Python on Windows. pandas, numpy, scikit-learn, matplotlib/seaborn/plotly.
 
 ```
 data/raw/          READ-ONLY. Never write here. The 3 SMARD CSVs.
-data/interim/      clean_hourly.csv: written once, read by every later phase
-data/processed/    Power BI star schema (phase 6 only)
+data/interim/      clean_hourly.csv: written once, read by every later stage,
+                    including the Power BI dashboard
 
 src/
   __init__.py
   config.py          paths, column groups, constants, plot theme
-  data_loader.py     phase 1: parse, merge, DST dedup, null profiling
-  features.py        phase 1: engineered columns, lags, calendar
-  eda.py             phase 2: profiling + correlation functions
-  visualize.py       phase 3: chart builders
-  models.py          phase 5: negative-price classifier, attribution GBM
-  evaluate.py        phase 5: metrics, regime splits, baseline comparison
-  powerbi_export.py  phase 6: star schema builder
+  data_loader.py     Clean: parse, merge, DST dedup, null profiling
+  features.py        Clean: engineered columns, lags, calendar
+  eda.py             EDA: profiling + correlation functions
+  visualize.py       Visualizations: chart builders
+  models.py          Machine learning: negative-price classifier, attribution GBM
+  evaluate.py        Machine learning: metrics, regime splits, baseline comparison
 
 notebooks/
-  SMARD_analysis.ipynb          phases 1-4 and 6: clean, EDA, viz, insights, Power BI export
-  SMARD_machine_Learning.ipynb  phase 5: ML, standalone; reads data/interim/clean_hourly.csv directly
+  SMARD_analysis.ipynb          Clean, EDA, Visualizations, Insights
+  SMARD_machine_Learning.ipynb  Machine learning: standalone; reads data/interim/clean_hourly.csv directly
 
-reference/         throwaway prior run. Read for reference; NOT a pipeline input.
-powerbi/           .pbix dashboard
+README.md          project overview, tech stack, findings, dashboard screenshots
+PowerBI/           dashboard screenshots and the .pbix file
 ```
 
-Two notebooks, not one. Each is the file that is run for its phases:
-`SMARD_analysis.ipynb` for 1-4 and 6, `SMARD_machine_Learning.ipynb` for phase
-5. `SMARD_machine_Learning.ipynb` does not import anything from
+`config.PROCESSED` is defined but currently unused: no code reads or writes
+`data/processed/`.
+
+Two notebooks, not one. `SMARD_analysis.ipynb` runs Clean, EDA, Visualizations,
+and Insights; `SMARD_machine_Learning.ipynb` runs the modelling section.
+`SMARD_machine_Learning.ipynb` does not import anything from
 `SMARD_analysis.ipynb`; it resolves its own project root and reads
 `clean_hourly.csv` directly, so it runs standalone from either notebook.
 
 There is no `outputs/` directory. Charts render inline in the notebook, tables
-print inline, insights live in notebook markdown cells. Only two things are
-written to disk: `data/interim/clean_hourly.csv` and, in phase 6, the
-`data/processed/` star schema.
+print inline, insights live in notebook markdown cells. The only thing written
+to disk by the Python pipeline is `data/interim/clean_hourly.csv`. The Power BI
+dashboard reads that file directly; there is no separate exported star schema.
 
 Module filenames are role-based, not phase-numbered, because Python module names
 cannot begin with a digit: `import 01_clean` is a syntax error.
@@ -115,7 +120,7 @@ Build one phase at a time. Do not scaffold ahead: later phases depend on what
 the data actually looks like.
 
 **Phase 1: clean.** `config.py` first (everything imports it), then
-`data_loader.py`, then `features.py`, then the phase-1 section of the notebook.
+`data_loader.py`, then `features.py`, then the Clean section of the notebook.
 Ends by writing `data/interim/clean_hourly.csv`.
 
 *Acceptance:* 17,544 rows on a complete hourly spine; 2 nulls in `price`;
@@ -137,7 +142,9 @@ notebook, `notebooks/SMARD_machine_Learning.ipynb`, not from
 `SMARD_analysis.ipynb`. Primary: binary classifier for negative-price hours.
 Secondary: GBM on actuals with permutation importance, framed as attribution.
 
-**Phase 6: Power BI.** `powerbi_export.py`. Star schema, described at the end.
+**Phase 6: Power BI.** Built by hand in Power BI Desktop, not exported from
+Python. Power Query reads `data/interim/clean_hourly.csv` directly and
+assembles the star schema described at the end.
 
 ## Parsing the SMARD files
 
@@ -182,8 +189,8 @@ every filtering step.
   Quantified: adding `month` to the attribution GBM *improves* same-year
   validation MAE (18.95 vs 19.52 on an Oct–Dec 2024 holdout) but *degrades*
   2025 test MAE by 4.09 (19.48 vs 15.39). A feature can look good in
-  validation and still fail across a regime shift. See
-  `reference/phase5_diagnostic.py` section 9.
+  validation and still fail across a regime shift, confirmed in the Insights
+  section of `notebooks/SMARD_analysis.ipynb`.
 - `Photovoltaics` is non-monotonic vs price (Pearson −0.474 vs Spearman −0.227),
   confounded by hour-of-day because of the mass of night-time zeros. Never
   interpret its effect without conditioning on hour.
@@ -255,9 +262,10 @@ threshold).
 Hyperparameters (`max_iter` for both GBMs and the classifier, `alpha` for
 Ridge) were selected on a chronological validation split *within* 2024 (train
 Jan–Sep, validate Oct–Dec); 2025 was used exactly once, for final evaluation,
-after selection. See `reference/phase5_diagnostic.py`. They are pinned in
-`src/models.py` (`FORECAST_GBM_MAX_ITER`, `ATTRIBUTION_GBM_MAX_ITER`,
-`RIDGE_ALPHA`, `CLASSIFIER_MAX_ITER`) rather than left at sklearn defaults.
+after selection. That selection run is not part of this repository; the
+chosen values are pinned directly in `src/models.py`
+(`FORECAST_GBM_MAX_ITER`, `ATTRIBUTION_GBM_MAX_ITER`, `RIDGE_ALPHA`,
+`CLASSIFIER_MAX_ITER`) rather than left at sklearn defaults.
 
 GBM figures are sklearn-version-dependent (measured on scikit-learn 1.8.0);
 naive and Ridge are stable across versions. Treat the GBM numbers as
@@ -278,7 +286,18 @@ Merit order, mean price by net-residual-load decile (monotonic across all ten):
 −0.77 → 37.34 → 61.67 → 75.65 → 85.06 → 92.56 → 99.24 → 106.98 → 118.99 → 162.43.
 Decile 0 is 52.9% negative-price hours.
 
-## Power BI target (phase 6)
+## Power BI dashboard (phase 6)
+
+Built by hand in Power BI Desktop, not exported from Python: there is no
+`src/powerbi_export.py`. Power Query reads `data/interim/clean_hourly.csv`
+directly and assembles the model; DAX adds capture rates, cannibalisation,
+merit-order deciles, and negative-price concentration. The `.pbix` and
+dashboard screenshots live in `PowerBI/`.
+
+The star schema below was the design intent going into Power Query. It has
+not been re-verified against the built `.pbix` file, since that is a binary
+this repository's tools cannot inspect directly: check it by hand in Power BI
+Desktop if precision matters.
 
 Two fact tables, not one: unpivoting generation into a single fact table would
 duplicate price and load 12× per hour and break SUM aggregations.
@@ -290,7 +309,7 @@ duplicate price and load 12× per hour and break SUM aggregations.
   display_order, color_hex
 
 Single-direction relationships, dimension filtering fact. No bidirectional filtering.
-Pages: Overview KPIs → Generation Mix → Price Analysis → Model Results.
+Pages, per the built dashboard: Overview, Price Analysis, Capture Rates, Generation Mix.
 
 ## Style
 
