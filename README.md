@@ -269,7 +269,7 @@ trained on one year and applied to the next carries that shift as error.
 
 **A forecast-legal model beats persistence.** Using only information available
 before the day-ahead auction closes, gradient boosting reached **MAE 23.70**
-against a naive baseline of **25.97**, a 8.7% improvement.
+against a naive baseline of **25.97**, an 8.7% improvement.
 
 ---
 
